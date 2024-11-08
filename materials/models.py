@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from config import settings
 
 NULLABLE = {"null": True, "blank": True}
 
@@ -10,6 +11,8 @@ class Course(models.Model):
         upload_to="courses", verbose_name=_("preview"), **NULLABLE
     )
     description = models.TextField(verbose_name=_("description"), **NULLABLE)
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULLABLE, verbose_name=_("onwer"))
 
     class Meta:
         verbose_name = _("course")
@@ -25,6 +28,7 @@ class Lessons(models.Model):
     url = models.TextField(**NULLABLE, verbose_name=_("url"))
     course = models.ForeignKey(Course, on_delete=models.CASCADE, **NULLABLE, verbose_name=_("course"),related_name="lessons")
 
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULLABLE, verbose_name=_("owner"))
     class Meta:
         verbose_name = _("lesson")
         verbose_name_plural = _("lessons")
