@@ -26,20 +26,43 @@ class User(AbstractUser):
     def __str__(self):
         return str(self.email)
 
+
 class Payment(models.Model):
     METHOD_CHOICES = [
         (_("CASH"), _("cash")),
         (_("TRAN"), _("transfer to account")),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, **NULLABLE, related_name="payments", verbose_name=_("user"))
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        **NULLABLE,
+        related_name="payments",
+        verbose_name=_("user"),
+    )
     date_payment = models.DateField(auto_now_add=True, verbose_name=_("date_payment"))
-    paid_course = models.ForeignKey("materials.Course", on_delete=models.CASCADE, **NULLABLE, verbose_name=_("course"))
-    paid_lesson = models.ForeignKey("materials.Lessons", on_delete=models.CASCADE, **NULLABLE, verbose_name=_("lessons"))
+    paid_course = models.ForeignKey(
+        "materials.Course",
+        on_delete=models.CASCADE,
+        **NULLABLE,
+        verbose_name=_("course"),
+    )
+    paid_lesson = models.ForeignKey(
+        "materials.Lessons",
+        on_delete=models.CASCADE,
+        **NULLABLE,
+        verbose_name=_("lessons"),
+    )
     amount = models.IntegerField(verbose_name=_("amount"))
-    method = models.CharField(choices=METHOD_CHOICES, max_length=4, default="TRAN", verbose_name=_("method"))
+    method = models.CharField(
+        choices=METHOD_CHOICES, max_length=4, default="TRAN", verbose_name=_("method")
+    )
+    session_id = models.CharField(max_length=127, **NULLABLE, verbose_name=_("session"))
+    url = models.URLField(max_length=511, **NULLABLE, verbose_name=_("url"))
+
     class Meta:
         verbose_name = _("payment")
         verbose_name_plural = _("payments")
+
     def __str__(self):
         return f"{self.user} - {self.paid_course} - {self.paid_lesson}: {self.amount}"

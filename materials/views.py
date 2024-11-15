@@ -1,20 +1,16 @@
-from rest_framework import generics
-from rest_framework.viewsets import ModelViewSet
+from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
+from rest_framework import generics, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
+from materials import serializers
+from materials.models import Course, Lessons, Subscription
+from materials.paginators import CustomPagination
 from materials.permissions import IsModerator, IsOwner
 
-from materials.models import Course, Lessons, Subscription
-from materials import serializers
-
-from rest_framework import status
-from rest_framework.response import Response
-from django.utils.translation import gettext_lazy as _
-
-from materials.paginators import CustomPagination
-
-from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import PermissionDenied
 
 class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all().order_by("pk")
@@ -27,11 +23,14 @@ class CourseViewSet(ModelViewSet):
         return self.serializer_class
 
     def get_permissions(self):
-        if self.action == 'create':
-            permission_classes = (IsAuthenticated, ~IsModerator,)
-        elif self.action == 'destroy':
+        if self.action == "create":
+            permission_classes = (
+                IsAuthenticated,
+                ~IsModerator,
+            )
+        elif self.action == "destroy":
             permission_classes = (IsAuthenticated, IsOwner)
-        elif self.action in ['update', 'retrieve', 'partial_update']:
+        elif self.action in ["update", "retrieve", "partial_update"]:
             permission_classes = (IsAuthenticated, IsModerator | IsOwner)
         else:
             permission_classes = (IsAuthenticated,)
@@ -40,9 +39,10 @@ class CourseViewSet(ModelViewSet):
     def perform_create(self, serializer):
         new_course = serializer.save(owner=self.request.user)
         super().perform_create(new_course)
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        if self.request.user.groups.filter(name='moderator').exists():
+        if self.request.user.groups.filter(name="moderator").exists():
             return queryset
         return queryset.filter(owner=self.request.user)
 
@@ -58,7 +58,6 @@ class LessonListAPIView(generics.ListAPIView):
     serializer_class = serializers.LessonSerializer
     pagination_class = CustomPagination
 
-
     def perform_create(self, serializer):
         new_lesson = serializer.save(owner=self.request.user)
         super().perform_create(new_lesson)
@@ -66,6 +65,7 @@ class LessonListAPIView(generics.ListAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(owner=self.request.user)
+
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Lessons.objects.all()
@@ -85,17 +85,18 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, IsOwner)
 
 
-
 class SubscriptionCreateDestroyAPIView(generics.CreateAPIView):
     queryset = Subscription.objects.all()
     serializer_class = serializers.SubscriptionSerializer
     permission_classes = (IsAuthenticated, ~IsModerator)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         message, stat = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(message, status=stat, headers=headers)
+
     def perform_create(self, serializer, *args, **kwargs):
         user = self.request.user
         course_id = self.request.data.get("course_id")
@@ -116,6 +117,8 @@ class SubscriptionCreateDestroyAPIView(generics.CreateAPIView):
             message["success"] = _("subscription created")
             stat = status.HTTP_201_CREATED
         return message, stat
+
+
 # class SubscriptionListAPIView(generics.ListAPIView):
 #     queryset = Subscription.objects.all()
 #     serializer_class = serializers.SubscriptionSerializer

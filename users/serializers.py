@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from users.models import User, Payment
+from users.models import Payment, User
 
 
 class PaymentSerializer(ModelSerializer):
@@ -14,6 +14,7 @@ class UserSerializer(ModelSerializer):
         model = User
         fields = "__all__"
 
+
 class UserDetailSerializer(ModelSerializer):
     payments = PaymentSerializer(many=True)
 
@@ -21,7 +22,8 @@ class UserDetailSerializer(ModelSerializer):
         model = User
         fields = "__all__"
 
+
 class UserShortSerializer(ModelSerializer):
     class Meta:
         model = User
-        exclude = ('password', 'last_name')
+        exclude = ("password", "last_name")

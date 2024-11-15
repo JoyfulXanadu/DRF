@@ -1,8 +1,9 @@
-from rest_framework.test import APITestCase
-from materials.models import Course, Lessons
-from users.models import User
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APITestCase
+
+from materials.models import Course, Lessons
+from users.models import User
 
 
 class CourseTestCase(APITestCase):
@@ -16,13 +17,17 @@ class CourseTestCase(APITestCase):
             is_staff=False,
             is_active=True,
         )
-        self.test_course = Course.objects.create(name="test_course", owner=self.test_user)
-        self.test_lesson = Lessons.objects.create(name="test_lesson", course=self.test_course, owner=self.test_user)
+        self.test_course = Course.objects.create(
+            name="test_course", owner=self.test_user
+        )
+        self.test_lesson = Lessons.objects.create(
+            name="test_lesson", course=self.test_course, owner=self.test_user
+        )
         self.client.force_authenticate(user=self.test_user)
 
     def test_lessons_list(self):
         """
-            Тестирование получения списка уроков
+        Тестирование получения списка уроков
         """
         url = reverse("materials:lessons_list")
         response = self.client.get(url)
@@ -32,12 +37,10 @@ class CourseTestCase(APITestCase):
 
     def test_lessons_create(self):
         """
-            Тестирование создания урока
+        Тестирование создания урока
         """
         url = reverse("materials:lessons_create")
-        data = {
-            "name": "test_create"
-        }
+        data = {"name": "test_create"}
         response = self.client.post(url, data=data)
         lesson = response.json()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -45,9 +48,7 @@ class CourseTestCase(APITestCase):
 
     def test_lessons_update(self):
         url = reverse("materials:lessons_update", args=(self.test_lesson.pk,))
-        data = {
-            "name": "test_update"
-        }
+        data = {"name": "test_update"}
         response = self.client.patch(url, data=data)
         lesson = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -55,7 +56,7 @@ class CourseTestCase(APITestCase):
 
     def test_lessons_retrieve(self):
         """
-            Тестирование получения урока
+        Тестирование получения урока
         """
         url = reverse("materials:lessons_retrieve", args=(self.test_lesson.pk,))
         response = self.client.get(url)
@@ -65,7 +66,7 @@ class CourseTestCase(APITestCase):
 
     def test_lessons_destroy(self):
         """
-            Тестирование удаления урока
+        Тестирование удаления урока
         """
         url = reverse("materials:lessons_delete", args=(self.test_lesson.pk,))
         response = self.client.delete(url)
@@ -74,28 +75,36 @@ class CourseTestCase(APITestCase):
 
     def test_course_list(self):
         """
-            Тестирование получения списка уроков
+        Тестирование получения списка уроков
         """
         url = reverse("materials:course-list")
         response = self.client.get(url)
         courses = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(courses,
-                         {'count': 1, 'next': None, 'previous': None, 'results': [{'id': self.test_course.pk,
-                                                                                   'name': self.test_course.name,
-                                                                                   'preview': None,
-                                                                                   'description': None,
-                                                                                   'owner': self.test_course.owner.pk}]
-                          })
+        self.assertEqual(
+            courses,
+            {
+                "count": 1,
+                "next": None,
+                "previous": None,
+                "results": [
+                    {
+                        "id": self.test_course.pk,
+                        "name": self.test_course.name,
+                        "preview": None,
+                        "description": None,
+                        "owner": self.test_course.owner.pk,
+                    }
+                ],
+            },
+        )
 
     def test_course_create(self):
         """
-            Тестирование создания курса
+        Тестирование создания курса
         """
         url = reverse("materials:course-list")
-        data = {
-            "name": "test_create"
-        }
+        data = {"name": "test_create"}
         response = self.client.post(url, data=data)
         courses = response.json()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -103,12 +112,10 @@ class CourseTestCase(APITestCase):
 
     def test_course_update(self):
         """
-            Тестирование редактирования курса
+        Тестирование редактирования курса
         """
         url = reverse("materials:course-detail", args=(self.test_course.pk,))
-        data = {
-            "name": "test_update"
-        }
+        data = {"name": "test_update"}
         response = self.client.patch(url, data=data)
         course = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -116,7 +123,7 @@ class CourseTestCase(APITestCase):
 
     def test_course_retrieve(self):
         """
-            Тестирование получения курса
+        Тестирование получения курса
         """
         url = reverse("materials:course-detail", args=(self.test_course.pk,))
         response = self.client.get(url)
@@ -126,7 +133,7 @@ class CourseTestCase(APITestCase):
 
     def test_course_destroy(self):
         """
-            Тестирование удаления курса
+        Тестирование удаления курса
         """
         url = reverse("materials:course-detail", args=(self.test_course.pk,))
         response = self.client.delete(url)

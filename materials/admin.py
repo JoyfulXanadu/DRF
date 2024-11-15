@@ -1,6 +1,8 @@
 from django.contrib import admin
 
 from materials.models import Course, Lessons
+
+
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = (
@@ -8,6 +10,8 @@ class CourseAdmin(admin.ModelAdmin):
         "description",
     )
     search_fields = ("name", "description")
+
+
 @admin.register(Lessons)
 class LessonAdmin(admin.ModelAdmin):
     list_display = (
