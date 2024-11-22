@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, URLField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from materials.models import Course, Lessons, Subscription
 from materials.validators import URLCorrectValidator

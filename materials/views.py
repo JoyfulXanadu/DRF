@@ -1,7 +1,6 @@
-from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, status
-from rest_framework.exceptions import PermissionDenied
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -10,6 +9,7 @@ from materials import serializers
 from materials.models import Course, Lessons, Subscription
 from materials.paginators import CustomPagination
 from materials.permissions import IsModerator, IsOwner
+from materials.tasks import send_update_course
 
 
 class CourseViewSet(ModelViewSet):
@@ -45,6 +45,10 @@ class CourseViewSet(ModelViewSet):
         if self.request.user.groups.filter(name="moderator").exists():
             return queryset
         return queryset.filter(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        update_course = serializer.save()
+        send_update_course(update_course.pk)
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
@@ -119,6 +123,7 @@ class SubscriptionCreateDestroyAPIView(generics.CreateAPIView):
         return message, stat
 
 
-# class SubscriptionListAPIView(generics.ListAPIView):
-#     queryset = Subscription.objects.all()
-#     serializer_class = serializers.SubscriptionSerializer
+class SubscriptionListAPIView(generics.ListAPIView):
+    queryset = Subscription.objects.all()
+    serializer_class = serializers.SubscriptionSerializer
+    
